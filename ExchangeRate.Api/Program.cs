@@ -9,8 +9,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var seqServerUrl = builder.Configuration["Logging:SeqServerUrl"];
+
 builder.Host.UseSerilog((ctx, lc) => lc
-    .WriteTo.Seq("http://seq")
+    .WriteTo.Seq(string.IsNullOrWhiteSpace(seqServerUrl) ? "http://seq" : seqServerUrl)
     .WriteTo.Console()
     .MinimumLevel.Information());
 
