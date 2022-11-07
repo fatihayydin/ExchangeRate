@@ -5,7 +5,7 @@ services:
     image: ${DOCKER_REGISTRY-}exchangerateapi
     build:
       context: .
-      dockerfile: ExchangeRate.Api/Dockerfile
+      dockerfile: src/ExchangeRate.Api/Dockerfile
     depends_on:
       - seq
   seq:
@@ -16,3 +16,11 @@ services:
       - ACCEPT_EULA=Y
     ports:
       - "5341:80"
+  sqlserver:
+    image: "mcr.microsoft.com/mssql/server"
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "P@ssWord123!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "4444:1433"

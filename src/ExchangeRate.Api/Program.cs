@@ -1,14 +1,25 @@
 using ExchangeRate.Api.Logging;
 using ExchangeRate.Application.ExternalServices;
-using Microsoft.Extensions.Options;
+using ExchangeRate.Data.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
+//To make serilog as primary logging
 Log.Logger = new LoggerConfiguration().CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
 // Add services to the container.
+
+string connectionString = builder.Configuration["ConnectionString"];
+
+builder.Services.AddDbContext<ExchangeRateDbContext>(options =>
+{
+    options.UseSqlServer(connectionString);
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -44,6 +55,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var seqServerUrl = builder.Configuration["Logging:SeqServerUrl"];
 
+//Console Logging and seq logging enabled
 builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Seq(string.IsNullOrWhiteSpace(seqServerUrl) ? "http://seq" : seqServerUrl)
     .WriteTo.Console()
@@ -52,7 +64,6 @@ builder.Host.UseSerilog((ctx, lc) => lc
 builder.Services.AddScoped<IExternalExchangeService>(sp => new ExternalExchangeService(builder.Configuration["Fixer:BaseUrl"], builder.Configuration["Fixer:ApiKey"], sp.GetService<ILogger<ExternalExchangeService>>()));
 
 var app = builder.Build();
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -67,6 +78,28 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+//Request Response logging with middleware
 app.UseMiddleware<HttpLoggingMiddleware>();
 
+CreateDbIfNotExists(app);
+
 app.Run();
+
+
+static void CreateDbIfNotExists(IHost host)
+{
+    using (var scope = host.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        try
+        {
+            var context = services.GetRequiredService<ExchangeRateDbContext>();
+            DbInitializer.Initialize(context);
+        }
+        catch (Exception ex)
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogCritical(ex, "An error occurred creating the DB.");
+        }
+    }
+}
