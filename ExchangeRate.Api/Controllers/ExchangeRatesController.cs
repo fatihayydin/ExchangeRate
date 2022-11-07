@@ -1,4 +1,3 @@
-using ExchangeRate.Api.Auth;
 using ExchangeRate.Application.ExternalServices;
 using Microsoft.AspNetCore.Mvc;
 

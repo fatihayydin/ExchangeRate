@@ -1,7 +1,10 @@
+using ExchangeRate.Api.Logging;
 using ExchangeRate.Application.ExternalServices;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Serilog;
+
+Log.Logger = new LoggerConfiguration().CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,5 +66,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseMiddleware<HttpLoggingMiddleware>();
 
 app.Run();
