@@ -10,14 +10,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IExternalExchangeService>(sp => new ExternalExchangeService("https://api.apilayer.com", "gH771U2gKZDOgj4Sltcda78YCYktZiz7", sp.GetService<ILogger<ExternalExchangeService>>()));
-
 var seqServerUrl = builder.Configuration["Logging:SeqServerUrl"];
 
 builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Seq(string.IsNullOrWhiteSpace(seqServerUrl) ? "http://seq" : seqServerUrl)
     .WriteTo.Console()
     .MinimumLevel.Information());
+
+builder.Services.AddScoped<IExternalExchangeService>(sp => new ExternalExchangeService(builder.Configuration["Fixer:BaseUrl"], builder.Configuration["Fixer:ApiKey"], sp.GetService<ILogger<ExternalExchangeService>>()));
 
 var app = builder.Build();
 
