@@ -20,7 +20,7 @@ namespace ExchangeRate.Api.Auth
             {
                 var apiKey = headerValues.FirstOrDefault();
 
-                if(String.IsNullOrEmpty(apiKey) || apiKey != "")
+                if(String.IsNullOrEmpty(apiKey) || apiKey != "Hebele")
                 {
                     context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
                 }
