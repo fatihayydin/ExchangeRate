@@ -1,8 +1,10 @@
+using ExchangeRate.Api.Auth;
 using ExchangeRate.Application.ExternalServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExchangeRate.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("exchange-rates")]
     public class ExchangeRatesController : ControllerBase
