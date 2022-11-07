@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using ExchangeRate.Abstraction.Data;
+using ExchangeRate.Data.Data;
+using System.Text;
 
 namespace ExchangeRate.Api.Logging
 {
@@ -17,7 +19,7 @@ namespace ExchangeRate.Api.Logging
             _logger = logger;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context, IUnitOfWork unitOfWork)
         {
             //Copy  pointer to the original response body stream
             var originalBodyStream = context.Response.Body;
@@ -26,6 +28,20 @@ namespace ExchangeRate.Api.Logging
             var request = await GetRequestAsTextAsync(context.Request);
             //Log it
             _logger.LogInformation(request);
+
+            var repository = unitOfWork.GetRepository<CustomerApiLog>();
+
+            var apiKey = context.Request.Headers["ApiKey"].FirstOrDefault();
+
+            await repository.MarkForInsertionAsync(new CustomerApiLog
+            {
+                Direction = Direction.Incoming,
+                ApiKey = apiKey ?? "",
+                CreatedDate = DateTime.Now,
+                Message = request
+            });
+
+            await unitOfWork.SaveChangesAsync();
 
 
             //Create a new memory stream and use it for the temp reponse body
@@ -39,6 +55,16 @@ namespace ExchangeRate.Api.Logging
             var response = await GetResponseAsTextAsync(context.Response);
             //Log it
             _logger.LogInformation(response);
+
+            await repository.MarkForInsertionAsync(new CustomerApiLog
+            {
+                Direction = Direction.Outgoing,
+                ApiKey = apiKey ?? "",
+                CreatedDate = DateTime.Now,
+                Message = response
+            });
+
+            await unitOfWork.SaveChangesAsync();
 
             //Copy the contents of the new memory stream, which contains the response to the original stream, which is then returned to the client.
             await responseBody.CopyToAsync(originalBodyStream);

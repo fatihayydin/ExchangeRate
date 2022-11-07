@@ -1,7 +1,11 @@
+using ExchangeRate.Abstraction.Data;
 using ExchangeRate.Api.Logging;
 using ExchangeRate.Application.ExternalServices;
 using ExchangeRate.Data.Data;
+using ExchangeRate.Data.DataAccess;
+using ExchangeRate.Data.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -11,45 +15,22 @@ Log.Logger = new LoggerConfiguration().CreateLogger();
 var builder = WebApplication.CreateBuilder(args);
 
 
-
 // Add services to the container.
-
-string connectionString = builder.Configuration["ConnectionString"];
-
-builder.Services.AddDbContext<ExchangeRateDbContext>(options =>
-{
-    options.UseSqlServer(connectionString);
-});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(c =>
+AddSwagger(builder.Services);
+
+string connectionString = builder.Configuration["ConnectionString"];
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+builder.Services.AddDataContext<ExchangeRateDbContext>(options =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Api Key Auth", Version = "v1" });
-    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
-    {
-        Description = "ApiKey must appear in header",
-        Type = SecuritySchemeType.ApiKey,
-        Name = "ApiKey",
-        In = ParameterLocation.Header,
-        Scheme = "ApiKeyScheme"
-    });
-    var key = new OpenApiSecurityScheme()
-    {
-        Reference = new OpenApiReference
-        {
-            Type = ReferenceType.SecurityScheme,
-            Id = "ApiKey"
-        },
-        In = ParameterLocation.Header
-    };
-    var requirement = new OpenApiSecurityRequirement
-                    {
-                             { key, new List<string>() }
-                    };
-    c.AddSecurityRequirement(requirement);
+    options.UseSqlServer(connectionString);
 });
 
 
@@ -102,4 +83,34 @@ static void CreateDbIfNotExists(IHost host)
             logger.LogCritical(ex, "An error occurred creating the DB.");
         }
     }
+}
+
+
+static void AddSwagger(IServiceCollection serviceCollection){
+    serviceCollection.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Api Key Auth", Version = "v1" });
+        c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+        {
+            Description = "ApiKey must appear in header",
+            Type = SecuritySchemeType.ApiKey,
+            Name = "ApiKey",
+            In = ParameterLocation.Header,
+            Scheme = "ApiKeyScheme"
+        });
+        var key = new OpenApiSecurityScheme()
+        {
+            Reference = new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = "ApiKey"
+            },
+            In = ParameterLocation.Header
+        };
+        var requirement = new OpenApiSecurityRequirement
+                    {
+                             { key, new List<string>() }
+                    };
+        c.AddSecurityRequirement(requirement);
+    });
 }

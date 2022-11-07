@@ -1,6 +1,7 @@
 ﻿using ExchangeRate.Abstraction.Data;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore;
+using ExchangeRate.Data.Data;
 
 namespace ExchangeRate.Data.DataAccess
 {
