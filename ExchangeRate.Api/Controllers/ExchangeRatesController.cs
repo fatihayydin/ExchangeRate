@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ExchangeRate.Api.Controllers
 {
-    [Authorize]
+    //Todo: Will be uncommented before sending!!
+    //[Authorize]
     [ApiController]
     [Route("exchange-rates")]
     public class ExchangeRatesController : ControllerBase
