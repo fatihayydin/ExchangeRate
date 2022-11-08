@@ -15,6 +15,7 @@ namespace ExchangeRate.Data.Data
         }
 
         public DbSet<CustomerApiLog> CustomerApiLogs { get; set; }
+        public DbSet<CustomerApiKey> CustomerApiKeys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

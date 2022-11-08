@@ -42,7 +42,7 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Console()
     .MinimumLevel.Information());
 
-builder.Services.AddScoped<IExternalExchangeService>(sp => new ExternalExchangeService(builder.Configuration["Fixer:BaseUrl"], builder.Configuration["Fixer:ApiKey"], sp.GetService<ILogger<ExternalExchangeService>>()));
+builder.Services.AddSingleton<IExternalExchangeService>(sp => new ExternalExchangeService(builder.Configuration["Fixer:BaseUrl"], builder.Configuration["Fixer:ApiKey"], sp.GetService<ILogger<ExternalExchangeService>>()));
 
 var app = builder.Build();
 

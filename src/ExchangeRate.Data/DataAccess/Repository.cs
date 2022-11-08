@@ -33,6 +33,12 @@ namespace ExchangeRate.Data.DataAccess
             Entities.Remove(entity);
         }
 
+        public async Task<IEnumerable<TEntity>> GetAsync(System.Linq.Expressions.Expression<Func<TEntity, bool>> filter)
+        {
+            return await Entities.Where(filter).ToListAsync();
+        }
+
+
         private DbSet<TEntity> Entities => _context.Set<TEntity>();
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ExchangeRate.Data.Data
 {
-    public class CustomerApiLog
+    public class CustomerApiKey
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
@@ -16,16 +16,10 @@ namespace ExchangeRate.Data.Data
         [StringLength(100)]
         public string? ApiKey { get; set; }
         [Required]
-        public Direction Direction { get; set; }
+        public string? Email { get; set; }
         [Required]
-        public string? Message { get; set; }
+        public bool IsActive { get; set; }
         [Required]
         public DateTime CreatedDate { get; set; }
-    }
-
-    public enum Direction
-    {
-        Incoming = 0,
-        Outgoing = 1
     }
 }
