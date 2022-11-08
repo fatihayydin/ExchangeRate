@@ -1,9 +1,10 @@
 using ExchangeRate.Abstraction.Data;
 using ExchangeRate.Api.Logging;
-using ExchangeRate.Application.ExternalServices;
 using ExchangeRate.Data.Data;
 using ExchangeRate.Data.DataAccess;
 using ExchangeRate.Data.Extensions;
+using ExchangeRate.Infrastructure.Exceptions;
+using ExchangeRate.Infrastructure.ExternalServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
@@ -59,8 +60,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-//Request Response logging with middleware
 app.UseMiddleware<HttpLoggingMiddleware>();
+
+app.UseExceptionMiddleware();
+//Request Response logging with middleware
 
 CreateDbIfNotExists(app);
 

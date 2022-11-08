@@ -1,5 +1,5 @@
 using ExchangeRate.Api.Auth;
-using ExchangeRate.Application.ExternalServices;
+using ExchangeRate.Infrastructure.ExternalServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExchangeRate.Api.Controllers
