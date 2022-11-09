@@ -62,6 +62,8 @@ builder.Services.AddSingleton<IExchangeService, ExchangeService>();
 builder.Services.AddSingleton(sp => new RedisServer(builder.Configuration["Redis:Hosts"], builder.Configuration["Redis:Password"]));
 builder.Services.AddSingleton<ICacheService, RedisCacheService>();
 
+builder.Services.AddMemoryCache();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

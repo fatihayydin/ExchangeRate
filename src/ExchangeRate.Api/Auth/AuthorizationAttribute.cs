@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using ExchangeRate.Abstraction.Data;
 using ExchangeRate.Data.Data;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ExchangeRate.Api.Auth
 {
@@ -22,20 +23,35 @@ namespace ExchangeRate.Api.Auth
             {
                 var apiKey = headerValues.FirstOrDefault();
 
-                if(String.IsNullOrEmpty(apiKey))
+                if (String.IsNullOrEmpty(apiKey))
                 {
                     context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+                    return;
                 }
 
-                var unitOfWork = context.HttpContext.RequestServices.GetService<IUnitOfWork>();
+                var memoryCache = context.HttpContext.RequestServices.GetService<IMemoryCache>();
 
-                var repository = unitOfWork.GetRepository<CustomerApiKey>();
+                var apiKeyHasAccess = memoryCache.Get<bool?>(apiKey);
 
-                var isExistingApiKey = repository.GetAsync(x => x.ApiKey == apiKey && x.IsActive).Result.Any();
+                if (apiKeyHasAccess == null)
+                {
+                    var unitOfWork = context.HttpContext.RequestServices.GetService<IUnitOfWork>();
 
-                if (!isExistingApiKey)
+                    var repository = unitOfWork.GetRepository<CustomerApiKey>();
+
+                    var isExistingActiveApiKey = repository.GetAsync(x => x.ApiKey == apiKey && x.IsActive).Result.Any();
+
+                    //Todo: can get from appsettings!
+                    //warning. redis can be used also to break cache key in distributed system.
+                    memoryCache.Set(apiKey, isExistingActiveApiKey, TimeSpan.FromMinutes(2));
+
+                    apiKeyHasAccess = isExistingActiveApiKey;
+                }
+
+                if (!apiKeyHasAccess.Value)
                 {
                     context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+                    return;
                 }
             }
             else
