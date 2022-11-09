@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using Polly;
+using Polly.Wrap;
 using Serilog;
 
 //To make serilog as primary logging
@@ -45,11 +46,10 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Console()
     .MinimumLevel.Information());
 
+var httpCircuitBreakerPolicy = Policy.HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+    .CircuitBreakerAsync(2, TimeSpan.FromSeconds(300), (ex, t) => Log.Logger.Fatal("Circuit Breaker is opened", ex), () => Log.Logger.Fatal("Circuit breaker closed!"));
 
-var httpRetryPolicy = Policy.HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
-    .CircuitBreakerAsync(2, TimeSpan.FromSeconds(300));
-
-builder.Services.AddSingleton<IAsyncPolicy<HttpResponseMessage>>(httpRetryPolicy);
+builder.Services.AddSingleton<IAsyncPolicy<HttpResponseMessage>>(httpCircuitBreakerPolicy);
 
 //Todo: Make registration for AppSettings. SO that no need for the constructor seperately.
 builder.Services.AddSingleton<IExternalExchangeService>(sp => new ExternalExchangeService(builder.Configuration["Fixer:BaseUrl"], builder.Configuration["Fixer:ApiKey"],
