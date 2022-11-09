@@ -1,12 +1,8 @@
 using ExchangeRate.Api.Auth;
 using ExchangeRate.Application.Services;
-using ExchangeRate.Infrastructure.Caching;
 using ExchangeRate.Infrastructure.Exceptions;
-using ExchangeRate.Infrastructure.Extensions;
 using ExchangeRate.Infrastructure.ExternalServices;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Text.RegularExpressions;
 
 namespace ExchangeRate.Api.Controllers
 {

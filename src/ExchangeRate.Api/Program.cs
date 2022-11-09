@@ -8,11 +8,8 @@ using ExchangeRate.Infrastructure.Caching;
 using ExchangeRate.Infrastructure.Exceptions;
 using ExchangeRate.Infrastructure.ExternalServices;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using Polly;
-using Polly.Wrap;
 using Serilog;
 
 //To make serilog as primary logging

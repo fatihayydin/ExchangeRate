@@ -2,10 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
-using System.ComponentModel.DataAnnotations;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace ExchangeRate.Infrastructure.Exceptions
 {

@@ -1,12 +1,5 @@
-﻿using ExchangeRate.Abstraction.Data;
-using ExchangeRate.Data.DataAccess;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ExchangeRate.Data.Extensions
 {
