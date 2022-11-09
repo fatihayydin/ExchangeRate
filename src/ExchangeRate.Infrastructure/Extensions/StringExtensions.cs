@@ -7,14 +7,21 @@ using System.Threading.Tasks;
 
 namespace ExchangeRate.Infrastructure.Extensions
 {
-    public static class JsonStringExtensions
+    public static class StringExtensions
     {
-        public static string RemoveUnescapeCharacters(this string value)
+        private static readonly Regex sWhitespace = new Regex(@"\s+");
+
+        public static string RemoveJsonUnescapeCharacters(this string value)
         {
             value = Regex.Unescape(value); //almost there
             value = value.Remove(value.Length - 1, 1).Remove(0, 1); //remove first and last qoutes
 
             return value;
+        }
+
+        public static string ReplaceWhitespace(this string input)
+        {
+            return input.Replace(" ", String.Empty);
         }
     }
 }

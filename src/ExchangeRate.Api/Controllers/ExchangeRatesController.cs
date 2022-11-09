@@ -39,10 +39,14 @@ namespace ExchangeRate.Api.Controllers
             //Todo: can be stored as JSON!?
             var exchangeRatesFromCache = _cacheService.GetFromString(exchangeBase);
 
-            if(!String.IsNullOrEmpty(exchangeRatesFromCache))
+            if (!String.IsNullOrEmpty(exchangeRatesFromCache))
             {
                 var allData = JsonConvert.DeserializeObject<ExchangeRatesModel>(exchangeRatesFromCache);
-                //Todo: symbols will be filtered!
+
+                var filteredSymbolsData = allData.Rates.Where(dic => symbols.ReplaceWhitespace().Split(',').Any(filter => dic.Key.Contains(filter))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+                allData.Rates = filteredSymbolsData;
+
                 return Ok(allData);
             }
 
