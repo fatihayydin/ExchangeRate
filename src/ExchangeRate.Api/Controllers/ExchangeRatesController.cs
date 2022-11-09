@@ -1,4 +1,5 @@
 using ExchangeRate.Api.Auth;
+using ExchangeRate.Application.Services;
 using ExchangeRate.Infrastructure.Caching;
 using ExchangeRate.Infrastructure.Extensions;
 using ExchangeRate.Infrastructure.ExternalServices;
@@ -16,14 +17,12 @@ namespace ExchangeRate.Api.Controllers
     {
 
         private readonly ILogger<ExchangeRatesController> _logger;
-        private readonly IExternalExchangeService _externalExchangeService;
-        private readonly ICacheService _cacheService;
+        private readonly IExchangeService _exchangeService;
 
-        public ExchangeRatesController(ILogger<ExchangeRatesController> logger, IExternalExchangeService externalExchangeService, ICacheService cacheService)
+        public ExchangeRatesController(ILogger<ExchangeRatesController> logger, IExchangeService exchangeService)
         {
             _logger = logger;
-            _externalExchangeService = externalExchangeService;
-            _cacheService = cacheService;
+            _exchangeService = exchangeService;
         }
 
         [HttpGet("")]
@@ -31,30 +30,7 @@ namespace ExchangeRate.Api.Controllers
         {
             _logger.LogInformation("Exchange Rates called!");
 
-            if (string.IsNullOrWhiteSpace(exchangeBase))
-            {
-                exchangeBase = "EUR";
-            }
-
-            //Todo: can be stored as JSON!?
-            var exchangeRatesFromCache = _cacheService.GetFromString(exchangeBase);
-
-            if (!String.IsNullOrEmpty(exchangeRatesFromCache))
-            {
-                var allData = JsonConvert.DeserializeObject<ExchangeRatesModel>(exchangeRatesFromCache);
-
-                var filteredSymbolsData = allData.Rates.Where(dic => symbols.ReplaceWhitespace().Split(',').Any(filter => dic.Key.Contains(filter))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-                allData.Rates = filteredSymbolsData;
-
-                return Ok(allData);
-            }
-
-            var exchangeRates = await _externalExchangeService.GetLatest(exchangeBase);
-
-            _cacheService.Add(exchangeBase, exchangeRates, TimeSpan.FromMinutes(30));
-
-            return Ok(exchangeRates);
+            return Ok(await _exchangeService.Get(exchangeBase, symbols));
         }
     }
 }
