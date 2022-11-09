@@ -7,7 +7,7 @@ namespace ExchangeRate.Infrastructure.ExternalServices
 {
     public interface IExternalExchangeService
     {
-        Task<ExchangeRatesModel?> GetLatest(string? exchangeBase, string? symbols = "");
+        Task<ExchangeRatesModel?> GetLatest(string? exchangeBase);
     }
 
     public class ExternalExchangeService : IExternalExchangeService
@@ -25,7 +25,7 @@ namespace ExchangeRate.Infrastructure.ExternalServices
             _policy = policy;
         }
 
-        public async Task<ExchangeRatesModel?> GetLatest(string? exchangeBase, string? symbols = "")
+        public async Task<ExchangeRatesModel?> GetLatest(string? exchangeBase)
         {
             if (string.IsNullOrWhiteSpace(exchangeBase))
             {
@@ -37,9 +37,9 @@ namespace ExchangeRate.Infrastructure.ExternalServices
                 client.BaseAddress = new Uri(_baseUrl);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("apikey", "Hebele");
+                client.DefaultRequestHeaders.Add("apikey", _apiKey);
 
-                HttpResponseMessage response = await _policy.ExecuteAsync(() => client.GetAsync($"fixer/latest?symbols={symbols}&base={exchangeBase}"));
+                HttpResponseMessage response = await _policy.ExecuteAsync(() => client.GetAsync($"fixer/latest?base={exchangeBase}"));
 
                 if (response.IsSuccessStatusCode)
                 {

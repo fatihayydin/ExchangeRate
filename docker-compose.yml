@@ -8,6 +8,8 @@ services:
       dockerfile: src/ExchangeRate.Api/Dockerfile
     depends_on:
       - seq
+      - sqlserver
+      - redis
   seq:
     image: datalust/seq:latest
     container_name: seq
@@ -24,3 +26,10 @@ services:
       ACCEPT_EULA: "Y"
     ports:
       - "4444:1433"
+  redis:
+    image: 'bitnami/redis:latest'
+    container_name: redis
+    environment:
+      - REDIS_PASSWORD=password123
+    ports:
+    - '7000:6379'

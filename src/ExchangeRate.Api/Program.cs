@@ -3,6 +3,7 @@ using ExchangeRate.Api.Logging;
 using ExchangeRate.Data.Data;
 using ExchangeRate.Data.DataAccess;
 using ExchangeRate.Data.Extensions;
+using ExchangeRate.Infrastructure.Caching;
 using ExchangeRate.Infrastructure.Exceptions;
 using ExchangeRate.Infrastructure.ExternalServices;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +55,9 @@ builder.Services.AddSingleton<IAsyncPolicy<HttpResponseMessage>>(httpCircuitBrea
 //Todo: Make registration for AppSettings. SO that no need for the constructor seperately.
 builder.Services.AddSingleton<IExternalExchangeService>(sp => new ExternalExchangeService(builder.Configuration["Fixer:BaseUrl"], builder.Configuration["Fixer:ApiKey"],
     sp.GetService<IAsyncPolicy<HttpResponseMessage>>(), sp.GetService<ILogger<ExternalExchangeService>>()));
+
+builder.Services.AddSingleton(sp => new RedisServer(builder.Configuration["Redis:Hosts"], builder.Configuration["Redis:Password"]));
+builder.Services.AddSingleton<ICacheService, RedisCacheService>();
 
 var app = builder.Build();
 
