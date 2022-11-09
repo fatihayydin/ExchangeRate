@@ -17,53 +17,23 @@ Log.Logger = new LoggerConfiguration().CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
 
-AddSwagger(builder.Services);
+AddSwagger(builder);
 
-string connectionString = builder.Configuration["ConnectionString"];
+RegisterDataServices(builder);
 
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+AddSeriLog(builder);
 
-builder.Services.AddDataContext<ExchangeRateDbContext>(options =>
-{
-    options.UseSqlServer(connectionString);
-});
+AddPolly(builder);
 
+RegisterExchangeServices(builder);
 
-var seqServerUrl = builder.Configuration["Logging:SeqServerUrl"];
-
-//Console Logging and seq logging enabled
-builder.Host.UseSerilog((ctx, lc) => lc
-    .WriteTo.Seq(string.IsNullOrWhiteSpace(seqServerUrl) ? "http://seq" : seqServerUrl)
-    .WriteTo.Console()
-    .MinimumLevel.Information());
-
-var httpCircuitBreakerPolicy = Policy.HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
-    .CircuitBreakerAsync(2, TimeSpan.FromSeconds(300), (ex, t) => Log.Logger.Fatal("Circuit Breaker is opened", ex), () => Log.Logger.Fatal("Circuit breaker closed!"));
-
-builder.Services.AddSingleton<IAsyncPolicy<HttpResponseMessage>>(httpCircuitBreakerPolicy);
-
-//Todo: Make registration for AppSettings. SO that no need for the constructor seperately.
-builder.Services.AddSingleton<IExternalExchangeService>(sp => new ExternalExchangeService(builder.Configuration["Fixer:BaseUrl"], builder.Configuration["Fixer:ApiKey"],
-    sp.GetService<IAsyncPolicy<HttpResponseMessage>>(), sp.GetService<ILogger<ExternalExchangeService>>()));
-
-builder.Services.AddSingleton<IExchangeService, ExchangeService>();
-
-builder.Services.AddSingleton(sp => new RedisServer(builder.Configuration["Redis:Hosts"], builder.Configuration["Redis:Password"]));
-builder.Services.AddSingleton<ICacheService, RedisCacheService>();
-
-builder.Services.AddMemoryCache();
+AddCacheServices(builder);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -72,42 +42,74 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
-
 app.MapControllers();
 
+#region Middlewares
+//Request Response logging with middleware
 app.UseMiddleware<HttpLoggingMiddleware>();
 
 app.UseExceptionMiddleware();
-//Request Response logging with middleware
+#endregion
 
 CreateDbIfNotExists(app);
 
 app.Run();
 
-
-static void CreateDbIfNotExists(IHost host)
+static void AddCacheServices(WebApplicationBuilder builder)
 {
-    using (var scope = host.Services.CreateScope())
-    {
-        var services = scope.ServiceProvider;
-        try
-        {
-            var context = services.GetRequiredService<ExchangeRateDbContext>();
-            DbInitializer.Initialize(context);
-        }
-        catch (Exception ex)
-        {
-            var logger = services.GetRequiredService<ILogger<Program>>();
-            logger.LogCritical(ex, "An error occurred creating the DB.");
-        }
-    }
+    builder.Services.AddSingleton(sp => new RedisServer(builder.Configuration["Redis:Hosts"], builder.Configuration["Redis:Password"]));
+    builder.Services.AddSingleton<ICacheService, RedisCacheService>();
+
+    builder.Services.AddMemoryCache();
 }
 
-
-static void AddSwagger(IServiceCollection serviceCollection)
+static void AddPolly(WebApplicationBuilder builder)
 {
-    serviceCollection.AddSwaggerGen(c =>
+    var httpCircuitBreakerPolicy = Policy.HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+    .CircuitBreakerAsync(2, TimeSpan.FromSeconds(300), (ex, t) => Log.Logger.Fatal("Circuit Breaker is opened", ex), () => Log.Logger.Fatal("Circuit breaker closed!"));
+
+    builder.Services.AddSingleton<IAsyncPolicy<HttpResponseMessage>>(httpCircuitBreakerPolicy);
+}
+
+static void RegisterExchangeServices(WebApplicationBuilder builder)
+{
+    //Todo: Make registration for AppSettings. SO that no need for the constructor seperately.
+    builder.Services.AddSingleton<IExternalExchangeService>(sp => new ExternalExchangeService(builder.Configuration["Fixer:BaseUrl"], builder.Configuration["Fixer:ApiKey"],
+        sp.GetService<IAsyncPolicy<HttpResponseMessage>>(), sp.GetService<ILogger<ExternalExchangeService>>()));
+
+    builder.Services.AddSingleton<IExchangeService, ExchangeService>();
+}
+
+static void RegisterDataServices(WebApplicationBuilder builder)
+{
+    string connectionString = builder.Configuration["ConnectionString"];
+
+    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+    builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+    builder.Services.AddDataContext<ExchangeRateDbContext>(options =>
+    {
+        options.UseSqlServer(connectionString);
+    });
+}
+
+static void AddSeriLog(WebApplicationBuilder builder)
+{
+    var seqServerUrl = builder.Configuration["Logging:SeqServerUrl"];
+
+    //Console Logging and seq logging enabled
+    builder.Host.UseSerilog((ctx, lc) => lc
+        .WriteTo.Seq(string.IsNullOrWhiteSpace(seqServerUrl) ? "http://seq" : seqServerUrl)
+        .WriteTo.Console()
+        .MinimumLevel.Information());
+}
+
+static void AddSwagger(WebApplicationBuilder builder)
+{
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+
+    builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Api Key Auth", Version = "v1" });
         c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
@@ -133,4 +135,22 @@ static void AddSwagger(IServiceCollection serviceCollection)
                     };
         c.AddSecurityRequirement(requirement);
     });
+}
+
+static void CreateDbIfNotExists(IHost host)
+{
+    using (var scope = host.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        try
+        {
+            var context = services.GetRequiredService<ExchangeRateDbContext>();
+            DbInitializer.Initialize(context);
+        }
+        catch (Exception ex)
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogCritical(ex, "An error occurred creating the DB.");
+        }
+    }
 }
