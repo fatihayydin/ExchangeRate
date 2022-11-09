@@ -21,9 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\ExchangeRate.Infrastructure\ExchangeRate.Infrastructure.csproj" />
     <ProjectReference Include="..\ExchangeRate.Application\ExchangeRate.Application.csproj" />
     <ProjectReference Include="..\ExchangeRate.Data\ExchangeRate.Data.csproj" />
+    <ProjectReference Include="..\ExchangeRate.Infrastructure\ExchangeRate.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

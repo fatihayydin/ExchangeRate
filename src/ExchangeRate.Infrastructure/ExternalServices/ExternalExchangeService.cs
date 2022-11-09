@@ -52,6 +52,8 @@ namespace ExchangeRate.Infrastructure.ExternalServices
                     }
                 }
             });
+
+            return null;
         }
 
         public ExternalExchangeService(string baseUrl, string apiKey, ILogger<ExternalExchangeService> logger)
