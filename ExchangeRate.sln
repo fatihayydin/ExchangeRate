@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExchangeRate.Application", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExchangeRate.Data", "src\ExchangeRate.Data\ExchangeRate.Data.csproj", "{C9E18B99-DB74-420A-9A63-4C3B8363F556}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRate.Infrastructure", "..\ExchangeRate.Infrastructure\ExchangeRate.Infrastructure.csproj", "{0C2B5FF9-7429-4DF8-9A23-89CED9942980}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRate.Infrastructure", "src\ExchangeRate.Infrastructure\ExchangeRate.Infrastructure.csproj", "{0C2B5FF9-7429-4DF8-9A23-89CED9942980}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
