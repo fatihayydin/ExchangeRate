@@ -35,7 +35,12 @@ namespace ExchangeRate.Infrastructure.Exceptions
 
         private async Task ManipulateResponse(HttpContext context, string message, HttpStatusCode statusCode)
         {
-            var result = JsonConvert.SerializeObject(message);
+            var errorMessage = new ErrorBaseResponse
+            {
+                Message = message
+            };
+
+            var result = JsonConvert.SerializeObject(errorMessage);
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)statusCode;
             await context.Response.WriteAsync(result);
@@ -48,5 +53,10 @@ namespace ExchangeRate.Infrastructure.Exceptions
         {
             return builder.UseMiddleware<ExceptionMiddleware>();
         }
+    }
+
+    public class ErrorBaseResponse
+    {
+        public string Message { get; set; }
     }
 }

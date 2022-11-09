@@ -1,6 +1,7 @@
 using ExchangeRate.Api.Auth;
 using ExchangeRate.Application.Services;
 using ExchangeRate.Infrastructure.Caching;
+using ExchangeRate.Infrastructure.Exceptions;
 using ExchangeRate.Infrastructure.Extensions;
 using ExchangeRate.Infrastructure.ExternalServices;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,11 @@ namespace ExchangeRate.Api.Controllers
             _exchangeService = exchangeService;
         }
 
-        [HttpGet("")]
+        [HttpGet]
+        [Route("")]
+        [ProducesResponseType(typeof(ExchangeRatesModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorBaseResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorBaseResponse), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] string? exchangeBase = "", [FromQuery] string? symbols = "")
         {
             _logger.LogInformation("Exchange Rates called!");

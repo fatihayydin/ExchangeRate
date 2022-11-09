@@ -21,13 +21,7 @@ namespace ExchangeRate.Api.Auth
             StringValues headerValues;
             if (context.HttpContext.Request.Headers.TryGetValue("ApiKey", out headerValues))
             {
-                var apiKey = headerValues.FirstOrDefault();
-
-                if (String.IsNullOrEmpty(apiKey))
-                {
-                    context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
-                    return;
-                }
+                var apiKey = headerValues.First();
 
                 var memoryCache = context.HttpContext.RequestServices.GetService<IMemoryCache>();
 
@@ -50,13 +44,13 @@ namespace ExchangeRate.Api.Auth
 
                 if (!apiKeyHasAccess.Value)
                 {
-                    context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+                    context.Result = new JsonResult(new { message = $"ApiKey: {apiKey} has no access!" }) { StatusCode = StatusCodes.Status401Unauthorized };
                     return;
                 }
             }
             else
             {
-                context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+                context.Result = new JsonResult(new { message = "No ApiKey Header supplied!" }) { StatusCode = StatusCodes.Status401Unauthorized };
             }
         }
     }
