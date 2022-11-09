@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Polly;
 using System.Net.Http.Headers;
 
 namespace ExchangeRate.Infrastructure.ExternalServices
@@ -14,7 +15,15 @@ namespace ExchangeRate.Infrastructure.ExternalServices
         private readonly string _baseUrl;
         private readonly string _apiKey;
         private readonly ILogger<ExternalExchangeService> _logger;
+        private readonly IAsyncPolicy<HttpResponseMessage> _policy;
 
+        public ExternalExchangeService(string baseUrl, string apiKey, IAsyncPolicy<HttpResponseMessage> policy, ILogger<ExternalExchangeService> logger)
+        {
+            _baseUrl = baseUrl;
+            _apiKey = apiKey;
+            _logger = logger;
+            _policy = policy;
+        }
 
         public async Task<ExchangeRatesModel?> GetLatest(string? exchangeBase, string? symbols = "")
         {
@@ -28,9 +37,9 @@ namespace ExchangeRate.Infrastructure.ExternalServices
                 client.BaseAddress = new Uri(_baseUrl);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("apikey", _apiKey);
+                client.DefaultRequestHeaders.Add("apikey", "Hebele");
 
-                HttpResponseMessage response = await client.GetAsync($"fixer/latest?symbols={symbols}&base={exchangeBase}");
+                HttpResponseMessage response = await _policy.ExecuteAsync(() => client.GetAsync($"fixer/latest?symbols={symbols}&base={exchangeBase}"));
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -49,12 +58,6 @@ namespace ExchangeRate.Infrastructure.ExternalServices
             }
         }
 
-        public ExternalExchangeService(string baseUrl, string apiKey, ILogger<ExternalExchangeService> logger)
-        {
-            _baseUrl = baseUrl;
-            _apiKey = apiKey;
-            _logger = logger;
-        }
     }
 
     public record ExchangeRatesModel

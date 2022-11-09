@@ -6,8 +6,10 @@ using ExchangeRate.Data.Extensions;
 using ExchangeRate.Infrastructure.Exceptions;
 using ExchangeRate.Infrastructure.ExternalServices;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
+using Polly;
 using Serilog;
 
 //To make serilog as primary logging
@@ -43,7 +45,15 @@ builder.Host.UseSerilog((ctx, lc) => lc
     .WriteTo.Console()
     .MinimumLevel.Information());
 
-builder.Services.AddSingleton<IExternalExchangeService>(sp => new ExternalExchangeService(builder.Configuration["Fixer:BaseUrl"], builder.Configuration["Fixer:ApiKey"], sp.GetService<ILogger<ExternalExchangeService>>()));
+
+var httpRetryPolicy = Policy.HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+    .CircuitBreakerAsync(2, TimeSpan.FromSeconds(300));
+
+builder.Services.AddSingleton<IAsyncPolicy<HttpResponseMessage>>(httpRetryPolicy);
+
+//Todo: Make registration for AppSettings. SO that no need for the constructor seperately.
+builder.Services.AddSingleton<IExternalExchangeService>(sp => new ExternalExchangeService(builder.Configuration["Fixer:BaseUrl"], builder.Configuration["Fixer:ApiKey"],
+    sp.GetService<IAsyncPolicy<HttpResponseMessage>>(), sp.GetService<ILogger<ExternalExchangeService>>()));
 
 var app = builder.Build();
 
@@ -89,7 +99,8 @@ static void CreateDbIfNotExists(IHost host)
 }
 
 
-static void AddSwagger(IServiceCollection serviceCollection){
+static void AddSwagger(IServiceCollection serviceCollection)
+{
     serviceCollection.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Api Key Auth", Version = "v1" });
