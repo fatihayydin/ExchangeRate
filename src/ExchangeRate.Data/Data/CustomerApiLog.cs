@@ -9,6 +9,8 @@ namespace ExchangeRate.Data.Data
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
         [Required]
+        public Guid RequestId{ get; set; }
+        [Required]
         [StringLength(100)]
         public string? ApiKey { get; set; }
         [Required]

@@ -21,6 +21,7 @@ namespace ExchangeRate.Api.Logging
 
         public async Task Invoke(HttpContext context, IUnitOfWork unitOfWork)
         {
+            var requestId = Guid.NewGuid();
             //Copy  pointer to the original response body stream
             var originalBodyStream = context.Response.Body;
 
@@ -35,6 +36,7 @@ namespace ExchangeRate.Api.Logging
 
             await repository.MarkForInsertionAsync(new CustomerApiLog
             {
+                RequestId = requestId,
                 Direction = Direction.Incoming,
                 ApiKey = apiKey ?? "",
                 CreatedDate = DateTime.Now,
@@ -59,6 +61,7 @@ namespace ExchangeRate.Api.Logging
 
             await repository.MarkForInsertionAsync(new CustomerApiLog
             {
+                RequestId =requestId,
                 Direction = Direction.Outgoing,
                 ApiKey = apiKey ?? "",
                 CreatedDate = DateTime.Now,

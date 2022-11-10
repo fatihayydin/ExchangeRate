@@ -22,7 +22,7 @@ namespace ExchangeRate.Api.Auth
 
             if (oldRecordsCountForApiKey >= 10)
             {
-                context.Result = new JsonResult(new { message = $"ApiKey: {apiKey} has requested too much!" }) { StatusCode = StatusCodes.Status429TooManyRequests };
+                context.Result = new JsonResult(new { message = $"ApiKey has requested too much!" }) { StatusCode = StatusCodes.Status429TooManyRequests };
                 return;
             }
         }
