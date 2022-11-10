@@ -13,6 +13,8 @@ namespace ExchangeRate.Data.Data
         [Required]
         public Direction Direction { get; set; }
         [Required]
+        public int HttpStatusCode { get; set; }
+        [Required]
         public string? Message { get; set; }
         [Required]
         public DateTime CreatedDate { get; set; }
