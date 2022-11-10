@@ -38,6 +38,10 @@ namespace ExchangeRate.Data.DataAccess
             return await Entities.Where(filter).ToListAsync();
         }
 
+        public async Task<int> CountAsync(System.Linq.Expressions.Expression<Func<TEntity, bool>> filter = null)
+        {
+            return await Entities.Where(filter).CountAsync();
+        }
 
         private DbSet<TEntity> Entities => _context.Set<TEntity>();
     }

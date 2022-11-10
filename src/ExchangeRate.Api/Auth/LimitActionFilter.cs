@@ -18,11 +18,9 @@ namespace ExchangeRate.Api.Auth
 
             var apiKey = context.HttpContext.Request.Headers["ApiKey"].FirstOrDefault();
 
-            var oldRecordsForApiKey = repository.GetAsync(x => x.ApiKey == apiKey && x.CreatedDate > DateTime.Now.AddHours(-1) && x.Direction == Direction.Outgoing && x.HttpStatusCode == (int)HttpStatusCode.OK);
+            var oldRecordsCountForApiKey = repository.CountAsync(x => x.ApiKey == apiKey && x.CreatedDate > DateTime.Now.AddHours(-1) && x.Direction == Direction.Outgoing && x.HttpStatusCode == (int)HttpStatusCode.OK).Result;
 
-            var count = oldRecordsForApiKey.Result.Count();
-
-            if (count >= 10)
+            if (oldRecordsCountForApiKey >= 10)
             {
                 context.Result = new JsonResult(new { message = $"ApiKey: {apiKey} has requested too much!" }) { StatusCode = StatusCodes.Status429TooManyRequests };
                 return;

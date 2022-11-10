@@ -9,5 +9,6 @@ namespace ExchangeRate.Abstraction.Data
         Task MarkForDeletion(object id, CancellationToken cancellationToken = default);
         void MarkForDeletion(TEntity entity);
         Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> filter);
+        Task<int> CountAsync(System.Linq.Expressions.Expression<Func<TEntity, bool>> filter = null);
     }
 }
