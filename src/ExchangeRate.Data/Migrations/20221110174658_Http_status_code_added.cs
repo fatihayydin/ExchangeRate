@@ -10,10 +10,6 @@ namespace ExchangeRate.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_CustomerApiLogs_ApiKey",
-                table: "CustomerApiLogs");
-
             migrationBuilder.AddColumn<int>(
                 name: "HttpStatusCode",
                 table: "CustomerApiLogs",
@@ -28,11 +24,6 @@ namespace ExchangeRate.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "HttpStatusCode",
                 table: "CustomerApiLogs");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CustomerApiLogs_ApiKey",
-                table: "CustomerApiLogs",
-                column: "ApiKey");
         }
     }
 }
