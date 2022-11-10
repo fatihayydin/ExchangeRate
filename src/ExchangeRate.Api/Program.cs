@@ -1,4 +1,5 @@
 using ExchangeRate.Abstraction.Data;
+using ExchangeRate.Api.Auth;
 using ExchangeRate.Api.Logging;
 using ExchangeRate.Application.Services;
 using ExchangeRate.Data.Data;
@@ -18,7 +19,10 @@ Log.Logger = new LoggerConfiguration().CreateLogger();
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers( config =>
+{
+    config.Filters.Add(new LimitActionFilter());
+});
 
 AddSwagger(builder);
 

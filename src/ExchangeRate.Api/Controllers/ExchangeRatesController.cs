@@ -26,6 +26,7 @@ namespace ExchangeRate.Api.Controllers
         [Route("")]
         [ProducesResponseType(typeof(ExchangeRatesModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorBaseResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ErrorBaseResponse), StatusCodes.Status429TooManyRequests)]
         [ProducesResponseType(typeof(ErrorBaseResponse), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] string? exchangeBase = "", [FromQuery] string? symbols = "")
         {
