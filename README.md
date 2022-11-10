@@ -6,3 +6,9 @@ Default it uses the docker containers in appsettings file. All uri and host info
 Mainly, it connects to external exchange service and give customers currencies they want.
 
 It has only one method for beginning. 
+
+To add migration for sql server in Data project
+dotnet ef --startup-project ..\ExchangeRate.Api\ migrations add XXX-{MigrationName}
+
+To update sql database 
+dotnet ef database update
