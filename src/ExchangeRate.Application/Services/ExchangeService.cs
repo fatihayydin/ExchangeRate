@@ -33,9 +33,7 @@ namespace ExchangeRate.Application.Services
             {
                 var allData = JsonConvert.DeserializeObject<ExchangeRatesModel>(exchangeRatesFromCache);
 
-                var filteredSymbolsData = allData.Rates.Where(dic => symbols.ReplaceWhitespace().Split(',').Any(filter => dic.Key.Contains(filter))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-                allData.Rates = filteredSymbolsData;
+                FilterValuesForSymbols(ref allData, symbols);
 
                 return allData;
             }
@@ -44,7 +42,17 @@ namespace ExchangeRate.Application.Services
 
             _cacheService.Add(exchangeBase, exchangeRates, TimeSpan.FromMinutes(30));
 
+            FilterValuesForSymbols(ref exchangeRates, symbols);
+
             return exchangeRates;
         }
+
+        private void FilterValuesForSymbols(ref ExchangeRatesModel? model, string symbols)
+        {
+            var filteredSymbolsData = model.Rates.Where(dic => symbols.ReplaceWhitespace().Split(',').Any(filter => dic.Key.Contains(filter))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            model.Rates = filteredSymbolsData;
+        }
+
     }
 }
