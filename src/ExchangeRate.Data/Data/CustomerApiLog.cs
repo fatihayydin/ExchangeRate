@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ExchangeRate.Data.Data
 {
-    //[Index(nameof(ApiKey),nameof(CreatedDate), nameof(HttpStatusCode), nameof(Direction))]
     public class CustomerApiLog
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
