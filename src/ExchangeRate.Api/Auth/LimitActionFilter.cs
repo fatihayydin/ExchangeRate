@@ -8,6 +8,7 @@ using System.Net;
 
 namespace ExchangeRate.Api.Auth
 {
+    //Todo: Can be getted from time series db like postgre sql timeseries db.
     public class LimitActionFilter : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext context)
