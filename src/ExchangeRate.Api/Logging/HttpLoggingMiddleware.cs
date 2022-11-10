@@ -38,8 +38,9 @@ namespace ExchangeRate.Api.Logging
                 Direction = Direction.Incoming,
                 ApiKey = apiKey ?? "",
                 CreatedDate = DateTime.Now,
-                Message = request
-            });
+                Message = request,
+                HttpStatusCode = 0
+            }); ;
 
             await unitOfWork.SaveChangesAsync();
 

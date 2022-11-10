@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ExchangeRate.Data.Data
 {
+    [Index(nameof(ApiKey))]
     public class CustomerApiLog
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
